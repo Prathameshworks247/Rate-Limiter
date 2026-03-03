@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
-from rate_limiter import RateLimitFactory
-from limiting_algorithms import RateLimitExceeded
+from services.rate_limiter import RateLimitFactory
+from algortihms.limiting_algorithms import RateLimitExceeded
 app = FastAPI()
 ip_addresses = {}
 
