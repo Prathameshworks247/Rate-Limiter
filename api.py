@@ -4,7 +4,11 @@ from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_
 from services.rate_limiter import RateLimitFactory
 from algortihms.limiting_algorithms import RateLimitExceeded
 
-app = FastAPI()
+app = FastAPI(
+    title="Rate Limiter API",
+    description="Demo API for rate-limiting algorithms with Prometheus metrics.",
+    version="1.0.0",
+)
 ip_addresses = {}
 
 REQUEST_COUNT = Counter(
@@ -39,11 +43,26 @@ async def prometheus_middleware(request: Request, call_next):
         REQUEST_LATENCY.labels(method=method, path=path).observe(perf_counter() - start_time)
 
 
-@app.get("/metrics")
+@app.get(
+    "/metrics",
+    summary="Prometheus metrics",
+    description="Exposes Prometheus metrics in text format for scraping.",
+)
 def metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
-@app.get("/limited")
+@app.get(
+    "/limited",
+    summary="Limited endpoint",
+    description=(
+        "Rate-limited endpoint. Current policy: 60 requests per minute per client IP "
+        "using Fixed Counter Window. Counter resets on minute boundary (HH:MM:00)."
+    ),
+    responses={
+        200: {"description": "Request allowed"},
+        429: {"description": "Rate limit exceeded (60 requests/minute per client IP)"},
+    },
+)
 def limited(request: Request):
     client = request.client.host
     try:
@@ -55,6 +74,10 @@ def limited(request: Request):
         RATE_LIMITED_COUNT.labels(path=request.url.path).inc()
         raise e
 
-@app.get("/unlimited")
+@app.get(
+    "/unlimited",
+    summary="Unlimited endpoint",
+    description="No rate limiting applied to this endpoint.",
+)
 def unlimited(request: Request):
     return "Free to use API limitless"
