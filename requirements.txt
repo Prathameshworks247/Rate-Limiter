@@ -1,2 +1,4 @@
 fastapi
 redis
+uvicorn
+prometheus-client
