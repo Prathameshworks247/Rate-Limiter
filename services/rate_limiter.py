@@ -1,4 +1,4 @@
-from algortihms.limiting_algorithms import FixedCounterWindow,TokenBucket, SlidingWindow
+from algortihms.limiting_algorithms import FixedCounterWindow,TokenBucket, SlidingWindow, SlidingWindowCounter
 class RateLimitFactory:
    @staticmethod
    def get_instance(algorithm:str = None):
